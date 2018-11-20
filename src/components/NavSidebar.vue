@@ -2,7 +2,7 @@
   <div class="nav-sidebar">
     <div class="navbar-brand nav-sidebar-header">
       <a 
-        :class="{'is-active':navMenuActive}" 
+        :class="{'is-active': navMenuActive}" 
         class="navbar-burger" 
         @click="toggleNavMenu"
       >

@@ -1,8 +1,12 @@
 import { upperFirst } from 'lodash';
 import { ajv } from '@/class/singleton';
+
 import * as cryptoDataSchemas from './cryptoData';
 import * as v3KeystoreSchemas from './v3Keystore';
 import * as identitySchemas from './identity';
+import * as balance from './balance';
+import * as tokens from './tokens';
+import * as transactions from './transactions';
 
 const makeValidator = schema => {
   const validator = ajv.compile(schema);

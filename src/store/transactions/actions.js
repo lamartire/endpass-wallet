@@ -136,7 +136,12 @@ const handleSendingError = (
 };
 
 // Transaction history from ethplorer
-const updateTransactionHistory = async ({ commit, dispatch, rootState }) => {
+const updateTransactionHistory = async ({
+  commit,
+  dispatch,
+  rootGetters,
+  rootState,
+}) => {
   if (!rootState.accounts.address) return;
 
   try {
@@ -145,6 +150,7 @@ const updateTransactionHistory = async ({ commit, dispatch, rootState }) => {
     const transactions = res.map(trx => new Transaction(trx));
 
     commit(SET_TRANSACTION_HISTORY, transactions);
+        
     dispatch(
       'connectionStatus/updateApiErrorStatus',
       {

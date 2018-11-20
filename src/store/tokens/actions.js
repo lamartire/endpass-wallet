@@ -138,9 +138,16 @@ const getCurrentAccountTokensData = async ({ dispatch }) => {
   await dispatch('getCurrentAccountTokensBalances');
 };
 
-const getTokensByAddress = async ({ dispatch, commit }, { address }) => {
+const getTokensByAddress = async (
+  { dispatch, commit, rootGetters },
+  { address },
+) => {
   try {
-    const resolvedTokens = await ethplorerService.getTokensWithBalance(address);
+    const activeNetwork = rootGetters['web3/activeNetwork'];
+    const resolvedTokens = await ethplorerService.getTokensWithBalance({
+      network: activeNetwork,
+      address,
+    });
 
     dispatch(
       'connectionStatus/updateApiErrorStatus',

@@ -1,75 +1,105 @@
-import { http } from '@/class/singleton';
 import throttledQueue from 'throttled-queue';
+import { http } from '@/class/singleton';
+import { CRYPTODATA_API_URL } from '@/constants';
+import { validate, balance, transactions } from '@/schema';
 
 const throttle = throttledQueue(1, 5000);
 
-export default {
-  getTokensWithBalance(address) {
-    return new Promise((res, rej) => {
+const ethplorerService = {
+  // Filter out spam balances of tokens
+  tokenIsNotSpam(token) {
+    return token && token.tokenInfo && token.tokenInfo.price;
+  },
+
+  getTokensWithBalance({ network, address }) {
+    // `https://api.ethplorer.io/getAddressInfo/${address}`
+    return new Promise((resolve, reject) => {
       throttle(() => {
         http
-          .get(`https://api.ethplorer.io/getAddressInfo/${address}`, {
+          .get(`${CRYPTODATA_API_URL}/balance/${network}/${address}/`, {
             params: {
+              // apiKey: 'freekey',
+              page: 1,
               limit: 50,
-              apiKey: 'freekey',
             },
           })
-          .then(resp => {
-            res(
-              (resp.data.tokens || [])
-                .filter(this.tokenIsNotSpam)
-                .map(token => token.tokenInfo),
+          .then(res => {
+            console.log('balance', res);
+            return validate(balance.validateBalance, res.data.tokens || []);
+          })
+          .then(res =>
+            res
+              .filter(ethplorerService.tokenIsNotSpam)
+              .map(token => token.tokenInfo),
+          )
+          .catch(reject);
+      });
+    });
+  },
+
+  getHistory({ network, address }) {
+    // `https://api.ethplorer.io/getAddressHistory/${address}`
+    return new Promise((resolve, reject) => {
+      throttle(() => {
+        http
+          .get(`${CRYPTODATA_API_URL}/transactions/${network}/${address}/`, {
+            params: {
+              // apiKey: 'freekey',
+              page: 1,
+              limit: 50,
+            },
+          })
+          .then(res => {
+            console.log('trans hist', res);
+            return validate(
+              transactions.validateTransactions,
+              res.data.operations || [],
             );
           })
-          .catch(rej);
+          .catch(reject);
       });
     });
   },
-  getHistory(address) {
-    return new Promise((res, rej) => {
+
+  getInfo({ network, address }) {
+    // `https://api.ethplorer.io/getAddressTransactions/${address}/`
+    return new Promise((resolve, reject) => {
       throttle(() => {
         http
-          .get(`https://api.ethplorer.io/getAddressHistory/${address}`, {
-            params: {
-              limit: 50,
-              apiKey: 'freekey',
+          .get(
+            `${CRYPTODATA_API_URL}/transactions/${network}/${address}/token`,
+            {
+              params: {
+                // apiKey: 'freekey',
+                page: 1,
+                limit: 50,
+              },
             },
+          )
+          .then(res => {
+            console.log('trans info', res);
+            return validate(transactions.validateTransactions, res.data);
           })
-          .then(resp => res(resp.data.operations || []))
-          .catch(rej);
-      });
-    });
-  },
-  getInfo(address) {
-    return new Promise((res, rej) => {
-      throttle(() => {
-        http
-          .get(`https://api.ethplorer.io/getAddressTransactions/${address}`, {
-            params: {
-              limit: 50,
-              apiKey: 'freekey',
-            },
-          })
-          .then(resp => res(resp.data || []))
-          .catch(rej);
+          .catch(reject);
       });
     });
   },
 
   // get tokens and ETH transactions
-  getTransactionHistory(address) {
-    return new Promise((res, rej) => {
+  getTransactionHistory(params) {
+    return new Promise((resolve, reject) => {
       throttle(() => {
-        Promise.all([this.getInfo(address), this.getHistory(address)])
-          .then(([transactions, history]) => {
-            res(transactions.concat(history));
+        Promise.all([this.getInfo(params), this.getHistory(params)])
+          .then(res => {
+            console.log('hist', res);
+            // console.log('transactions history', transactions.concat(history));
+
+            // res(transactions.concat(history));
           })
-          .catch(rej);
+          .catch(reject);
       });
     });
   },
-  // Filter out spam balances of tokens
-  tokenIsNotSpam(token) {
-    return token && token.tokenInfo && token.tokenInfo.price;
-  },
 };
+
+export default ethplorerService;
