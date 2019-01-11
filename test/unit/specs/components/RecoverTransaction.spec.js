@@ -2,7 +2,7 @@ import { shallow, createLocalVue } from '@vue/test-utils';
 import Notifications from 'vue-notification';
 import RecoverTransaction from '@/components/RecoverTransaction';
 import { testUtils } from '@endpass/utils';
-import { ethplorerTransactions } from 'fixtures/transactions';
+import { cryptoDataTransactions } from 'fixtures/transactions';
 
 describe('RecoverTransaction', () => {
   let wrapper;
@@ -41,7 +41,7 @@ describe('RecoverTransaction', () => {
 
     it('should show restored transaction data', () => {
       wrapper.setData({
-        recoveredTransaction: ethplorerTransactions[0],
+        recoveredTransaction: cryptoDataTransactions[0],
       });
 
       expect(wrapper.element).toMatchSnapshot();

@@ -2,7 +2,7 @@ import { address } from '../accounts';
 import activeAccount from '../keystore/account_1';
 import gasPrice from '../cryptodata/gasprice';
 
-export const ethplorerHistory = [
+export const cryptoDataHistory = [
   {
     timestamp: 1535036970,
     transactionHash:
@@ -19,7 +19,7 @@ export const ethplorerHistory = [
       lastUpdated: 1519886541914,
       issuancesCount: 0,
       holdersCount: 4630,
-      image: 'https://ethplorer.io/images/farmatrust.png',
+      image: 'https://cryptoData.io/images/farmatrust.png',
       website: 'http://farmatrust.io',
       ethTransfersCount: 0,
       price: false,
@@ -45,7 +45,7 @@ export const ethplorerHistory = [
       lastUpdated: 1519886541914,
       issuancesCount: 0,
       holdersCount: 4630,
-      image: 'https://ethplorer.io/images/farmatrust.png',
+      image: 'https://cryptoData.io/images/farmatrust.png',
       website: 'http://farmatrust.io',
       ethTransfersCount: 0,
       price: false,
@@ -57,7 +57,7 @@ export const ethplorerHistory = [
   },
 ];
 
-export const ethplorerTransactions = [
+export const cryptoDataTransactions = [
   {
     timestamp: 1535035155,
     from: '0xb14ab53e38da1c172f877dbc6d65e4a1b0474c3c',

@@ -5,6 +5,8 @@ import { http } from '@/class/singleton';
 import { CRYPTODATA_API_URL } from '@/constants';
 import { cryptoDataValidator } from '@/schema';
 
+console.log(cryptoDataValidator);
+
 const throttle = throttledQueue(3, ENV.serviceThrottleTimeout);
 
 const cryptoDataService = {

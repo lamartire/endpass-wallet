@@ -1,7 +1,7 @@
 import state from '@/store/transactions';
 
 import {
-  ethplorerTransactions,
+  cryptoDataTransactions,
   pendingTransactions,
 } from 'fixtures/transactions';
 import { checksumAddress } from 'fixtures/accounts';
@@ -325,7 +325,7 @@ describe('transactions getters', () => {
 
   describe('getPendingTransactions', () => {
     it('should return all pending transactions', () => {
-      stateInstance.pendingTransactions = ethplorerTransactions;
+      stateInstance.pendingTransactions = cryptoDataTransactions;
 
       expect(state.getters.getPendingTransactions(stateInstance)).toEqual(
         stateInstance.pendingTransactions,
@@ -335,7 +335,7 @@ describe('transactions getters', () => {
 
   describe('getPendingTransactionByHash', () => {
     it('should return pending transaction by hash', () => {
-      stateInstance.pendingTransactions = ethplorerTransactions;
+      stateInstance.pendingTransactions = cryptoDataTransactions;
 
       expect(
         state.getters.getPendingTransactionByHash(stateInstance)(
@@ -347,7 +347,7 @@ describe('transactions getters', () => {
 
   describe('getTransactionByHash', () => {
     it('should return transaction by hash', () => {
-      stateInstance.transactionHistory = ethplorerTransactions;
+      stateInstance.transactionHistory = cryptoDataTransactions;
 
       expect(
         state.getters.getTransactionByHash(stateInstance)(

@@ -4,7 +4,7 @@ import {
   UPDATE_TRANSACTION,
   SET_TRANSACTION_HISTORY,
 } from '@/store/transactions/mutations-types';
-import { ethplorerTransactions } from 'fixtures/transactions';
+import { cryptoDataTransactions } from 'fixtures/transactions';
 
 const { mutations } = state;
 
@@ -20,7 +20,7 @@ describe('transactions  mutations', () => {
 
   describe('ADD_TRANSACTION', () => {
     it('should add transaction to pending transactions', () => {
-      const [tx] = ethplorerTransactions;
+      const [tx] = cryptoDataTransactions;
 
       mutations[ADD_TRANSACTION](stateInstance, tx);
 
@@ -30,7 +30,7 @@ describe('transactions  mutations', () => {
 
   describe('UPDATE_TRANSACTION', () => {
     it('should update transaction with given data', () => {
-      const [tx] = ethplorerTransactions;
+      const [tx] = cryptoDataTransactions;
 
       stateInstance.pendingTransactions = [tx];
       mutations[UPDATE_TRANSACTION](stateInstance, {

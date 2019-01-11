@@ -5,7 +5,7 @@ import {
   UPDATE_TRANSACTION,
   SET_TRANSACTION_HISTORY,
 } from '@/store/transactions/mutations-types';
-import ethplorerService from '@/services/ethplorer';
+import cryptoDataService from '@/services/cryptoData';
 import {
   EventEmitter,
   Transaction,
@@ -17,8 +17,8 @@ import {
   transactionHash,
   shortTransactionHash,
   blockTransactions,
-  ethplorerHistory,
-  ethplorerTransactions,
+  cryptoDataHistory,
+  cryptoDataTransactions,
 } from 'fixtures/transactions';
 
 const { state: transactionsState, actions } = state;
@@ -40,7 +40,7 @@ describe('transactions actions', () => {
       catch: jest.fn(),
     }));
     transaction = {
-      ...ethplorerTransactions[0],
+      ...cryptoDataTransactions[0],
       nonce: 1,
       getApiObject: jest.fn(),
     };
@@ -254,7 +254,7 @@ describe('transactions actions', () => {
       expect.assertions(2);
 
       const expectedHistory = []
-        .concat(ethplorerHistory, ethplorerTransactions)
+        .concat(cryptoDataHistory, cryptoDataTransactions)
         .map(trx => new Transaction(trx));
 
       await actions.updateTransactionHistory({
@@ -276,7 +276,7 @@ describe('transactions actions', () => {
       expect.assertions(2);
 
       const error = new Error();
-      ethplorerService.getTransactionHistory.mockRejectedValueOnce(error);
+      cryptoDataService.getTransactionHistory.mockRejectedValueOnce(error);
       await actions.updateTransactionHistory({
         dispatch,
         commit,
@@ -386,7 +386,7 @@ describe('transactions actions', () => {
     it('should not handle transaction when "to" is null', () => {
       actions.handleBlockTransactions(
         { commit, dispatch, rootState, rootGetters },
-        { transactions: [{ ...ethplorerTransactions[1], to: null }] },
+        { transactions: [{ ...cryptoDataTransactions[1], to: null }] },
       );
 
       expect(commit).toHaveBeenCalledTimes(0);

@@ -1,5 +1,5 @@
 import Vuex from 'vuex';
-import { ethplorerTransactions } from 'fixtures/transactions';
+import { cryptoDataTransactions } from 'fixtures/transactions';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Notifications from 'vue-notification';
 import SignTransaction from '@/components/SignTransaction';
@@ -44,7 +44,7 @@ describe('SignTransaction', () => {
 
     it('should enable "Sign transaction" button', () => {
       wrapper.setData({
-        transaction: JSON.stringify(ethplorerTransactions[0]),
+        transaction: JSON.stringify(cryptoDataTransactions[0]),
       });
 
       expect(wrapper.element).toMatchSnapshot();
@@ -60,7 +60,7 @@ describe('SignTransaction', () => {
 
     it('should show modal window for password confirmation', () => {
       wrapper.setData({
-        transaction: JSON.stringify(ethplorerTransactions[0]),
+        transaction: JSON.stringify(cryptoDataTransactions[0]),
         isPasswordModal: true,
       });
 

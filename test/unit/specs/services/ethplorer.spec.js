@@ -3,10 +3,11 @@ import MockAdapter from 'axios-mock-adapter';
 import { http } from '@/class/singleton';
 import { address } from 'fixtures/accounts';
 
-const ethplorerService = require.requireActual('@/services/ethplorer').default;
+const cryptoDataService = require.requireActual('@/services/cryptoData')
+  .default;
 
 describe('Ethplorer service', () => {
-  const apiUrl = 'https://api.ethplorer.io';
+  const apiUrl = 'https://api.cryptoData.io';
   let mock;
 
   beforeEach(() => {
@@ -50,7 +51,7 @@ describe('Ethplorer service', () => {
     it('should handle successfull request', async () => {
       expect.assertions(1);
       mock.onGet(url).reply(200, successTokenResp);
-      const result = await ethplorerService.getTokensWithBalance(address);
+      const result = await cryptoDataService.getTokensWithBalance(address);
 
       expect(result).toHaveLength(2);
     });
@@ -58,7 +59,7 @@ describe('Ethplorer service', () => {
     it('should return empty array with failed request', async () => {
       expect.assertions(1);
       mock.onGet(url).reply(200, { success: false });
-      const result = await ethplorerService.getTokensWithBalance(address);
+      const result = await cryptoDataService.getTokensWithBalance(address);
 
       expect(result).toEqual([]);
     });
@@ -68,13 +69,13 @@ describe('Ethplorer service', () => {
       mock.onGet(url).reply(500, {});
 
       await expect(
-        ethplorerService.getTokensWithBalance(address),
+        cryptoDataService.getTokensWithBalance(address),
       ).rejects.toThrow();
     });
   });
 
   describe('getHistory', () => {
-    const { getHistory } = ethplorerService;
+    const { getHistory } = cryptoDataService;
     const url = `${apiUrl}/getAddressHistory/${address}`;
 
     const successResp = {
@@ -118,7 +119,7 @@ describe('Ethplorer service', () => {
   });
 
   describe('getInfo', () => {
-    const { getInfo } = ethplorerService;
+    const { getInfo } = cryptoDataService;
     const url = `${apiUrl}/getAddressTransactions/${address}`;
 
     const successResp = [{}, {}];

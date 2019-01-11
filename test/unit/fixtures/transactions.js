@@ -7,7 +7,7 @@ export const signedTransactionHash =
   '0xd8d5809a2223a1ced2cb76064a5e1d3b08053dbad88dbbb09096d090364c5bbb64d3536e80c5f4bab16528fcb8020705ea5d53ff893621bce81635684dc3a6511c';
 
 export const transaction = {
-  tokenInfo: null,
+  token: null,
   gasPrice: '40',
   gasLimit: '22000',
   nonce: 0,
@@ -21,12 +21,12 @@ export const paramsTransaction = {
   gasPrice: '0x2',
 };
 
-export const ethplorerHistory = [
+export const cryptoDataHistory = [
   {
     timestamp: 1535036970,
     transactionHash:
       '0x631cf7bb186019649920b09a7d5394c206cfe8aec55b3c1e8f0cc876def942a7',
-    tokenInfo: {
+    token: {
       address: '0x2aec18c5500f21359ce1bea5dc1777344df4c0dc',
       name: 'FarmaTrust',
       decimals: '18',
@@ -38,7 +38,7 @@ export const ethplorerHistory = [
       lastUpdated: 1519886541914,
       issuancesCount: 0,
       holdersCount: 4630,
-      image: 'https://ethplorer.io/images/farmatrust.png',
+      image: 'https://cryptoData.io/images/farmatrust.png',
       website: 'http://farmatrust.io',
       ethTransfersCount: 0,
       price: false,
@@ -52,7 +52,7 @@ export const ethplorerHistory = [
     timestamp: 1535036944,
     transactionHash:
       '0xe03f54be853b798e40ebc12b96050ab9624fd95d6750e043f306f247132998a7',
-    tokenInfo: {
+    token: {
       address: '0x2aec18c5500f21359ce1bea5dc1777344df4c0dc',
       name: 'FarmaTrust',
       decimals: '18',
@@ -64,7 +64,7 @@ export const ethplorerHistory = [
       lastUpdated: 1519886541914,
       issuancesCount: 0,
       holdersCount: 4630,
-      image: 'https://ethplorer.io/images/farmatrust.png',
+      image: 'https://cryptoData.io/images/farmatrust.png',
       website: 'http://farmatrust.io',
       ethTransfersCount: 0,
       price: false,
@@ -76,7 +76,7 @@ export const ethplorerHistory = [
   },
 ];
 
-export const ethplorerTransactions = [
+export const cryptoDataTransactions = [
   {
     timestamp: 1535035155,
     from: '0xb14ab53e38da1c172f877dbc6d65e4a1b0474c3c',
@@ -180,7 +180,7 @@ export default {
   signedTransactionHash,
   shortTransactionHash,
   blockTransactions,
-  ethplorerHistory,
-  ethplorerTransactions,
+  cryptoDataHistory,
+  cryptoDataTransactions,
   pendingTransactions,
 };

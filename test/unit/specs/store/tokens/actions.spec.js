@@ -11,7 +11,7 @@ import { NotificationError, Token } from '@/class';
 import {
   userService,
   tokenInfoService,
-  ethplorerService,
+  cryptoDataService,
   cryptoDataService,
 } from '@/services';
 import ERC20Token from '@/class/erc20';
@@ -442,7 +442,7 @@ describe('tokens actions', () => {
     it('should request tokens by address and set it', async () => {
       expect.assertions(5);
 
-      ethplorerService.getTokensWithBalance.mockResolvedValueOnce(tokens);
+      cryptoDataService.getTokensWithBalance.mockResolvedValueOnce(tokens);
 
       await actions.getTokensByAddress({ dispatch, commit }, { address });
 
@@ -460,7 +460,7 @@ describe('tokens actions', () => {
       expect(dispatch).toHaveBeenCalledWith(
         'connectionStatus/updateApiErrorStatus',
         {
-          id: 'ethplorer',
+          id: 'cryptoData',
           status: true,
         },
         { root: true },
@@ -472,7 +472,7 @@ describe('tokens actions', () => {
 
       const error = new Error();
 
-      ethplorerService.getTokensWithBalance.mockRejectedValueOnce(error);
+      cryptoDataService.getTokensWithBalance.mockRejectedValueOnce(error);
 
       await actions.getTokensByAddress({ dispatch, commit }, { address });
 

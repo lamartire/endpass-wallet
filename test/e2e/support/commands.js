@@ -50,8 +50,8 @@ import {
   getTransactionReceipt_b14ab_31ea8_resend,
 } from '../fixtures/web3';
 import {
-  ethplorerHistory,
-  ethplorerTransactions,
+  cryptoDataHistory,
+  cryptoDataTransactions,
 } from '../fixtures/transactions';
 
 const identityAPIUrl = '/identity/api/v1.1';
@@ -205,14 +205,14 @@ Cypress.Commands.add('mockEthplorerRequests', () => {
   cy.route({
     method: 'GET',
     url: '/getAddressTransactions/*',
-    response: ethplorerTransactions,
+    response: cryptoDataTransactions,
     status: 200,
   }).as('addressTransactionsRequest');
   cy.route({
     method: 'GET',
     url: '/getAddressHistory/*',
     response: {
-      operations: ethplorerHistory,
+      operations: cryptoDataHistory,
     },
     status: 200,
   }).as('addressHistoryRequest');

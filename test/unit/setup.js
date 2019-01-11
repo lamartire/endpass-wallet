@@ -9,7 +9,6 @@ import 'mocks/web3';
 import 'mocks/services/user';
 import 'mocks/services/auth';
 import 'mocks/services/identityMode';
-import 'mocks/services/ethplorer';
 import 'mocks/services/cryptoData';
 import 'mocks/services/tokeninfo';
 import 'mocks/services/localSettings';

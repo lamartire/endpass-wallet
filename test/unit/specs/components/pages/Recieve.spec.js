@@ -55,7 +55,7 @@ describe('ReceivePage', () => {
           getters: {
             incomingTransactions: jest
               .fn()
-              .mockReturnValue(transactions.ethplorerTransactions),
+              .mockReturnValue(transactions.cryptoDataTransactions),
           },
           actions: trxActions,
         },

@@ -97,7 +97,7 @@ describe('AccountWalletCard', () => {
 
   describe('behavior', () => {
     it('should load tokens data on component create if tokens are empty', async () => {
-      expect.assertions(2);
+      expect.assertions(1);
 
       wrapper = shallow(AccountWalletCard, {
         ...options,
@@ -109,7 +109,6 @@ describe('AccountWalletCard', () => {
       await global.flushPromises();
 
       expect(tokensActions.getTokensByAddress).toBeCalled();
-      expect(tokensActions.getTokensBalancesByAddress).toBeCalled();
     });
 
     it('should not load tokens data on component create if tokens are not empty', async () => {

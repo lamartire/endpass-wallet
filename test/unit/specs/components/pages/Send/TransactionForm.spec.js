@@ -30,7 +30,7 @@ describe('Send – TransactionForm', () => {
   const transactionProp = {
     ...transaction,
     gasPrice: 0,
-    tokenInfo: token,
+    token: token,
   };
   const defaultStore = {
     state: {
@@ -182,7 +182,7 @@ describe('Send – TransactionForm', () => {
         });
       });
 
-      describe('changeTokenInfo', () => {
+      describe('changeToken', () => {
         const tokenBySymbolGetterMock = jest.fn().mockReturnValue(tokens[0]);
 
         beforeEach(() => {
@@ -206,17 +206,17 @@ describe('Send – TransactionForm', () => {
         });
 
         it('should change token info if it is not empty', () => {
-          wrapper.vm.changeTokenInfo('SCDT');
+          wrapper.vm.changeToken('SCDT');
 
           expect(tokenBySymbolGetterMock).toBeCalledWith('SCDT');
-          expect(wrapper.vm.transaction.tokenInfo).toEqual(tokens[0]);
+          expect(wrapper.vm.transaction.token).toEqual(tokens[0]);
         });
 
         it('should not change token info if it is empty', () => {
-          wrapper.vm.changeTokenInfo(null);
+          wrapper.vm.changeToken(null);
 
           expect(tokenBySymbolGetterMock).not.toBeCalled();
-          expect(wrapper.vm.transaction.tokenInfo).toBe(null);
+          expect(wrapper.vm.transaction.token).toBe(null);
         });
       });
 
@@ -326,7 +326,7 @@ describe('Send – TransactionForm', () => {
         wrapper.setProps({
           transaction: {
             ...transactionProp,
-            tokenInfo: '0x0',
+            token: '0x0',
           },
         });
 

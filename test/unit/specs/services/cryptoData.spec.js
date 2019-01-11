@@ -1,5 +1,4 @@
 import MockAdapter from 'axios-mock-adapter';
-
 import { http } from '@/class/singleton';
 import { NotificationError } from '@/class';
 import { cryptoDataValidator } from '@/schema';
@@ -124,12 +123,16 @@ describe('Crypto data service', () => {
       );
 
       axiosMock.onGet(requestUrl).reply(200);
-      cryptoDataValidator.validateSymbolsPrice.mockImplementationOnce(() => {
-        throw symbolPriceValidationError;
-      });
-      cryptoDataValidator.validateSymbolsPrice.mockImplementationOnce(() => {
-        throw symbolsPriceValidationError;
-      });
+      cryptoDataValidator.validateCryptoDataSymbolPrices.mockImplementationOnce(
+        () => {
+          throw symbolPriceValidationError;
+        },
+      );
+      cryptoDataValidator.validateCryptoDataSymbolPrices.mockImplementationOnce(
+        () => {
+          throw symbolsPriceValidationError;
+        },
+      );
 
       await expect(
         cryptoDataService.getSymbolsPrice(fromSymbols[0], toSymbol),
