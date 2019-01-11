@@ -24,7 +24,7 @@ const changeNetwork = async ({ commit, dispatch, getters }, { networkUrl }) => {
     dispatch('accounts/updateBalance', {}, { root: true }),
     dispatch('tokens/getNetworkTokens', {}, { root: true }),
     dispatch('tokens/getCurrentAccountTokens', {}, { root: true }),
-    dispatch('tokens/getCurrentAccountTokensData', null, {
+    dispatch('tokens/getCurrentAccountTokensPrices', null, {
       root: true,
     }),
     dispatch('dapp/reset', null, { root: true }),

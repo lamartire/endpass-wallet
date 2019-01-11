@@ -27,7 +27,6 @@ export default class Wallet {
     }
 
     const { type: accountType, index } = info;
-
     const isPublic = !keystore.isV3(v3Keystore);
     const isHardware = Object.values(HARDWARE_WALLET_TYPE).includes(
       accountType,

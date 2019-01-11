@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { uniq, uniqWith } from 'lodash';
+import { get, uniq, uniqWith } from 'lodash';
 import web3 from '@/class/singleton/web3';
 import { MAIN_NET_ID } from '@/constants';
 import { Transaction } from '@/class';
@@ -60,7 +60,7 @@ const pendingBalance = (state, getters, rootState) => {
         tnx.networkId === networkId,
     )
     .map(tnx => {
-      const tnxValue = tnx.token === 'ETH' ? tnx.valueWei : '0';
+      const tnxValue = get(tnx, 'token.symbol') === 'ETH' ? tnx.valueWei : '0';
 
       return BigNumber(tnx.gasCost).plus(tnxValue);
     })

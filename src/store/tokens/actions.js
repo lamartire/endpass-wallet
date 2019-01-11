@@ -1,4 +1,4 @@
-import { mapValues } from 'lodash';
+import { mapKeys, mapValues } from 'lodash';
 import {
   SET_LOADING,
   SET_TOKENS_BY_ADDRESS,
@@ -8,14 +8,7 @@ import {
   SET_USER_TOKENS,
 } from './mutations-types';
 import { NotificationError, Token } from '@/class';
-import ERC20Token from '@/class/erc20';
-import {
-  tokenInfoService,
-  ethplorerService,
-  cryptoDataService,
-  userService,
-} from '@/services';
-import { merge } from '@endpass/utils/objects';
+import { tokenInfoService, cryptoDataService, userService } from '@/services';
 import { mapArrayByProp } from '@endpass/utils/arrays';
 import { MAIN_NET_ID } from '@/constants';
 
@@ -26,10 +19,10 @@ const init = async ({ dispatch }) => {
 };
 
 const subscribeOnCurrentAccountTokensUpdates = ({ dispatch }) => {
-  dispatch('getCurrentAccountTokensData');
+  dispatch('getCurrentAccountTokensPrices');
 
   setInterval(() => {
-    dispatch('getCurrentAccountTokensData');
+    dispatch('getCurrentAccountTokensPrices');
   }, ENV.priceUpdateInterval);
 };
 
@@ -103,28 +96,6 @@ const getCurrentAccountTokens = async ({ commit, dispatch, rootState }) => {
   }
 };
 
-const getCurrentAccountTokensBalances = async ({
-  dispatch,
-  commit,
-  getters,
-  rootState,
-}) => {
-  const { address } = rootState.accounts;
-
-  if (!address) return;
-
-  const tokens = getters.allCurrentAccountTokens;
-  const tokensBalances = await dispatch('getTokensBalances', {
-    address,
-    tokens,
-  });
-
-  commit(SET_BALANCES_BY_ADDRESS, {
-    balances: tokensBalances,
-    address,
-  });
-};
-
 const getCurrentAccountTokensPrices = async ({ dispatch, getters }) => {
   await dispatch('getTokensPrices', {
     tokensSymbols: Object.values(getters.allCurrentAccountTokens).map(
@@ -133,18 +104,13 @@ const getCurrentAccountTokensPrices = async ({ dispatch, getters }) => {
   });
 };
 
-const getCurrentAccountTokensData = async ({ dispatch }) => {
-  await dispatch('getCurrentAccountTokensPrices');
-  await dispatch('getCurrentAccountTokensBalances');
-};
-
 const getTokensByAddress = async (
   { dispatch, commit, rootGetters },
   { address },
 ) => {
   try {
     const activeNetwork = rootGetters['web3/activeNetwork'];
-    const resolvedTokens = await ethplorerService.getTokensWithBalance({
+    const resolvedTokens = await cryptoDataService.getTokensWithBalance({
       network: activeNetwork,
       address,
     });
@@ -152,7 +118,7 @@ const getTokensByAddress = async (
     dispatch(
       'connectionStatus/updateApiErrorStatus',
       {
-        id: 'ethplorer',
+        id: 'cryptoData',
         status: true,
       },
       { root: true },
@@ -168,27 +134,11 @@ const getTokensByAddress = async (
   } catch (e) {
     // May be we must set empty array to user tokens
     e.apiError = {
-      id: 'ethplorer',
+      id: 'cryptoData',
       status: false,
     };
     dispatch('errors/emitError', e, { root: true });
   }
-};
-
-const getTokensBalancesByAddress = async (
-  { commit, dispatch, getters },
-  { address },
-) => {
-  const tokens = getters.tokensByAddress(address);
-  const tokensBalances = await dispatch('getTokensBalances', {
-    address,
-    tokens,
-  });
-
-  commit(SET_BALANCES_BY_ADDRESS, {
-    address,
-    balances: tokensBalances,
-  });
 };
 
 const getNetworkTokens = async ({ commit, dispatch, rootGetters }) => {
@@ -215,27 +165,6 @@ const getNetworkTokens = async ({ commit, dispatch, rootGetters }) => {
   }
 };
 
-const getTokensBalances = async (ctx, { address, tokens }) => {
-  const balances = await Promise.all(
-    Object.keys(tokens).map(async tokenAddress => {
-      try {
-        const balance = await ERC20Token.getBalance(address, tokenAddress);
-
-        return {
-          [tokenAddress]: balance,
-        };
-      } catch (err) {
-        return {
-          [tokenAddress]: null,
-        };
-      }
-    }),
-  );
-  const tokensBalances = merge(...balances);
-
-  return tokensBalances;
-};
-
 const getTokensPrices = async ({ commit, getters }, { tokensSymbols }) => {
   if (tokensSymbols.length === 0) return;
 
@@ -251,18 +180,31 @@ const getTokensPrices = async ({ commit, getters }, { tokensSymbols }) => {
   }
 };
 
+const setTokensWithBalancesByAddress = async (
+  { commit },
+  { address, tokens },
+) => {
+  const tokensByAddress = mapKeys(tokens, 'address');
+
+  commit(SET_TOKENS_BY_ADDRESS, {
+    tokens: Object.keys(tokensByAddress),
+    address,
+  });
+  commit(SET_BALANCES_BY_ADDRESS, {
+    balances: mapValues(tokensByAddress, token => token.balance),
+    address,
+  });
+};
+
 export default {
   init,
   subscribeOnCurrentAccountTokensUpdates,
   addUserToken,
   removeUserToken,
-  getTokensBalancesByAddress,
   getCurrentAccountTokens,
-  getCurrentAccountTokensBalances,
   getNetworkTokens,
   getTokensByAddress,
-  getTokensBalances,
   getTokensPrices,
   getCurrentAccountTokensPrices,
-  getCurrentAccountTokensData,
+  setTokensWithBalancesByAddress,
 };

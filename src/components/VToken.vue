@@ -38,15 +38,15 @@
       </span>
       <balance
         v-if="token.balance"
-        :amount="amount"
+        :amount="token.balance"
         :currency="token.symbol"
         :decimals="token.decimals"
         :round="4"
         class="is-inline-block"
       />
-
       <balance
         v-if="price"
+        :is-loading="!token.price"
         :amount="amount"
         :currency="currency"
         :decimals="2"
@@ -60,8 +60,9 @@
 </template>
 
 <script>
-import Balance from '@/components/Balance';
+import { get } from 'lodash';
 import { BigNumber } from 'bignumber.js';
+import Balance from '@/components/Balance';
 
 // Displays details about a single ERC20 token
 export default {
@@ -73,31 +74,24 @@ export default {
       required: true,
     },
 
-    // fiat currency
     currency: {
       type: String,
       default: 'USD',
     },
 
     price: {
-      type: String,
+      type: [Number, String],
       default: '0',
     },
   },
 
   computed: {
-    // Return token balance in wei
     amount() {
-      let balanceBn;
+      const { token } = this;
 
-      if (this.token.balance instanceof BigNumber) {
-        balanceBn = this.token.balance;
-      } else {
-        balanceBn = new BigNumber(this.token.balance);
-      }
-      const decimalsBn = new BigNumber(10).pow(this.token.decimals);
-
-      return balanceBn.div(decimalsBn).toString(10);
+      return BigNumber(token.balance)
+        .times(get(token, 'price.ETH', 0))
+        .toString();
     },
 
     icon() {

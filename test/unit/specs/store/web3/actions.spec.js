@@ -61,7 +61,7 @@ describe('web3 actions', () => {
       expect(userService.setSettings).toHaveBeenCalledWith({ net: networkId });
     });
 
-    it('should dispatch subscribeOnBlockUpdates, tokens/getCurrentAccountTokens and tokens/getCurrentAccountTokensData actions', async () => {
+    it('should dispatch subscribeOnBlockUpdates, tokens/getCurrentAccountTokens and tokens/getCurrentAccountTokensPrices actions', async () => {
       expect.assertions(1);
 
       await changeNetwork({ commit, dispatch, getters }, { networkUrl });
@@ -71,7 +71,7 @@ describe('web3 actions', () => {
         ['accounts/updateBalance', {}, { root: true }],
         ['tokens/getNetworkTokens', {}, { root: true }],
         ['tokens/getCurrentAccountTokens', {}, { root: true }],
-        ['tokens/getCurrentAccountTokensData', null, { root: true }],
+        ['tokens/getCurrentAccountTokensPrices', null, { root: true }],
         ['dapp/reset', null, { root: true }],
       ]);
     });

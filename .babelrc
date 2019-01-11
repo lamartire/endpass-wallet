@@ -3,10 +3,7 @@
     [
       "env",
       {
-        "modules": false,
-        "targets": {
-          "browsers": ["> 1%", "last 2 versions", "not ie > 0"]
-        }
+        "modules": false
       }
     ],
     "stage-2"

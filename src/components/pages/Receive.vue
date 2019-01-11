@@ -98,7 +98,7 @@ export default {
 
     wallet: {
       handler() {
-        this.updateTransactionHistory();
+        this.cryptoDataService();
       },
       immediate: true,
     },
@@ -110,7 +110,7 @@ export default {
   },
 
   methods: {
-    ...mapActions('transactions', ['updateTransactionHistory']),
+    ...mapActions('transactions', ['cryptoDataService']),
     ...mapActions('accounts', ['selectWallet']),
 
     async clickSendButton(address) {
@@ -124,7 +124,7 @@ export default {
         return;
       }
       this.isLoading = true;
-      await this.updateTransactionHistory();
+      await this.cryptoDataService();
       this.isLoading = false;
     },
 

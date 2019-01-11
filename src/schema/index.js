@@ -4,20 +4,19 @@ import { ajv } from '@/class/singleton';
 import * as cryptoDataSchemas from './cryptoData';
 import * as v3KeystoreSchemas from './v3Keystore';
 import * as identitySchemas from './identity';
-import * as balance from './balance';
-import * as tokens from './tokens';
-import * as transactions from './transactions';
 
 const makeValidator = schema => {
   const validator = ajv.compile(schema);
 
-  return (data, isOnlyLog = ENV.isProduction) => {
+  return data => {
     if (!validator(data)) {
+      /* eslint-disable no-console */
       console.warn('Schema validation error', data);
 
-      if (!isOnlyLog) {
-        throw new Error(ajv.errorsText(validator));
+      if (!ENV.isProduction) {
+        console.error(ajv.errorsText(validator));
       }
+      /* eslint-enable no-console */
     }
 
     return data;

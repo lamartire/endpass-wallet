@@ -47,7 +47,7 @@ store.watch(
   () =>
     Promise.all([
       store.dispatch('accounts/updateBalance'),
-      store.dispatch('tokens/getCurrentAccountTokensData'),
+      store.dispatch('tokens/getCurrentAccountTokensPrices'),
     ]),
 );
 

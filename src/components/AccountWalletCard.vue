@@ -99,28 +99,16 @@ export default {
   },
 
   methods: {
-    ...mapActions('tokens', [
-      'getTokensByAddress',
-      'getTokensBalancesByAddress',
-    ]),
+    ...mapActions('tokens', ['getTokensByAddress']),
 
     async loadTokensData() {
-      const {
-        address,
-        accountTokens,
-        getTokensByAddress,
-        getTokensBalancesByAddress,
-      } = this;
+      const { address, accountTokens, getTokensByAddress } = this;
 
       this.isLoading = true;
 
       if (Object.keys(accountTokens).length === 0) {
         await getTokensByAddress({ address });
       }
-
-      await getTokensBalancesByAddress({
-        address,
-      });
 
       this.isLoading = false;
     },

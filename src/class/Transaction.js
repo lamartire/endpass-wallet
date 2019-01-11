@@ -1,4 +1,3 @@
-import { get } from 'lodash';
 import { ERC20Token, Token } from '@/class';
 import { isNumeric } from '@endpass/utils/numbers';
 import web3 from '@/class/singleton/web3';
@@ -19,13 +18,13 @@ export default class Transaction {
     timestamp,
     to = '',
     networkId = 1,
-    tokenInfo = undefined,
+    token = undefined,
     transactionHash,
     value = '0',
     success,
   }) {
-    if (tokenInfo) {
-      this.tokenInfo = new Token(tokenInfo);
+    if (token) {
+      this.token = new Token(token);
       this.valueWei = value;
     } else {
       this.value = value;
@@ -71,14 +70,14 @@ export default class Transaction {
   }
 
   static getValidData(transaction) {
-    const { data, tokenInfo } = transaction;
+    const { data, token } = transaction;
 
-    if (!transaction.tokenInfo) {
+    if (!transaction.token) {
       return data;
     }
 
     const validTo = Transaction.getValidTo(transaction);
-    const erc20 = new ERC20Token(tokenInfo.address);
+    const erc20 = new ERC20Token(token.address);
     const contract = erc20.getContract();
     const transactionValueInWei = Transaction.getTransactonValueInWei(
       transaction,
@@ -96,14 +95,14 @@ export default class Transaction {
   }
 
   static getTransactonValueInWei(transaction) {
-    const { value, tokenInfo } = transaction;
+    const { value, token } = transaction;
 
     if (!isNumeric(value)) {
       return '0';
     }
 
-    const multiplier = tokenInfo
-      ? BigNumber('10').pow(tokenInfo.decimals || 0)
+    const multiplier = token
+      ? BigNumber('10').pow(token.decimals || 0)
       : BigNumber('10').pow(18);
 
     return BigNumber(value)
@@ -141,8 +140,8 @@ export default class Transaction {
 
     let multiplier = BigNumber('10').pow(18);
 
-    if (this.tokenInfo) {
-      multiplier = BigNumber('10').pow(this.tokenInfo.decimals || 0);
+    if (this.token) {
+      multiplier = BigNumber('10').pow(this.token.decimals || 0);
     }
 
     return BigNumber(this._value)
@@ -155,8 +154,8 @@ export default class Transaction {
 
     let multiplier = BigNumber('10').pow(18);
 
-    if (this.tokenInfo) {
-      multiplier = BigNumber('10').pow(this.tokenInfo.decimals || 0);
+    if (this.token) {
+      multiplier = BigNumber('10').pow(this.token.decimals || 0);
     }
 
     this._value = BigNumber(valueWei)
@@ -220,15 +219,11 @@ export default class Transaction {
     return BigNumber(this.gasPriceWei).times(this.gasLimit);
   }
 
-  get token() {
-    return get(this, 'tokenInfo.symbol') || 'ETH';
-  }
-
   getValidData() {
     let { data } = this;
 
-    if (this.tokenInfo) {
-      const erc20 = new ERC20Token(this.tokenInfo.address);
+    if (this.token) {
+      const erc20 = new ERC20Token(this.token.address);
       const contract = erc20.getContract();
 
       data = contract.methods.transfer(this.validTo, this.valueWei).encodeABI();
@@ -257,7 +252,8 @@ export default class Transaction {
 
   getApiObject() {
     this.data = this.getValidData();
-    let tnxData = {
+
+    const tnxData = {
       from: this.from,
       to: this.validTo,
       gasPrice: numberToHex(this.gasPriceWei),
@@ -267,12 +263,11 @@ export default class Transaction {
       data: this.data,
     };
 
-    if (this.tokenInfo) {
-      tnxData = {
-        ...tnxData,
-        to: this.tokenInfo.address,
+    if (this.token) {
+      Object.assign(tnxData, {
+        to: this.token.address,
         value: '0x0',
-      };
+      });
     }
 
     return tnxData;
@@ -297,10 +292,10 @@ export default class Transaction {
       hash: this.hash,
     };
 
-    if (this.tokenInfo) {
+    if (this.token) {
       tnxData = {
         ...tnxData,
-        tokenInfo: this.tokenInfo,
+        token: this.token,
         to: this.validTo,
         value: this.valueWei,
       };

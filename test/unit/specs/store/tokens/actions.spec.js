@@ -81,7 +81,7 @@ describe('tokens actions', () => {
       await actions.subscribeOnCurrentAccountTokensUpdates({ dispatch });
 
       expect(dispatch).toHaveBeenCalledTimes(1);
-      expect(dispatch).toHaveBeenCalledWith('getCurrentAccountTokensData');
+      expect(dispatch).toHaveBeenCalledWith('getCurrentAccountTokensPrices');
       expect(setInterval).toHaveBeenCalledTimes(1);
     });
   });
@@ -366,9 +366,9 @@ describe('tokens actions', () => {
     });
   });
 
-  describe('getCurrentAccountTokensData', () => {
+  describe('getCurrentAccountTokensPrices', () => {
     it('should request current user tokens balances and prices', async () => {
-      await actions.getCurrentAccountTokensData({ dispatch });
+      await actions.getCurrentAccountTokensPrices({ dispatch });
 
       expect(dispatch).toHaveBeenCalledTimes(2);
       expect(dispatch).toHaveBeenNthCalledWith(

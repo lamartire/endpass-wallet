@@ -132,17 +132,15 @@
 </template>
 
 <script>
+import { get } from 'lodash';
 import dayjs from 'dayjs';
+import { mapState, mapGetters, mapActions } from 'vuex';
+import { formateDate, fromNow } from '@endpass/utils/date';
+import { getShortStringWithEllipsis } from '@endpass/utils/strings';
 import Account from '@/components/Account';
 import ResendModal from '@/components/modal/ResendModal';
 import PasswordModal from '@/components/modal/PasswordModal';
 import VSpinner from '@/components/ui/VSpinner';
-import { mapState, mapGetters, mapActions } from 'vuex';
-import { formateDate, fromNow } from '@endpass/utils/date';
-import { getShortStringWithEllipsis } from '@endpass/utils/strings';
-import web3 from '@/class/singleton/web3';
-
-const { hexToString } = web3.utils;
 
 export default {
   props: {
@@ -163,18 +161,22 @@ export default {
       dateTimer: null,
     };
   },
+
   computed: {
     ...mapState({
       address: state => state.accounts.address,
       isSyncing: state => !!state.connectionStatus.isSyncing,
     }),
     ...mapGetters('accounts', ['isPublicAccount']),
+
     recieve() {
       return this.transaction.to === this.address;
     },
+
     isSuccess() {
       return this.transaction.state === 'success';
     },
+
     isError() {
       return (
         this.transaction.state === 'error' ||
@@ -182,28 +184,28 @@ export default {
         this.state === 'canceled'
       );
     },
+
     isPending() {
       return this.transaction.state === 'pending';
     },
+
     pendingActionText() {
-      let text = '';
-
-      if (this.isHavePendingRelatedTransaction) {
-        if (this.state === 'canceled') {
-          text = 'Canceling...';
-        } else if (this.state === 'resent') {
-          text = 'Resending...';
-        }
+      switch (this.state) {
+        case 'canceled':
+          return 'Canceling...';
+        case 'resent':
+          return 'Resending...';
+        default:
+          return '';
       }
-
-      return text;
     },
+
     isHavePendingRelatedTransaction() {
       return (
         this.transactionToSend && this.transactionToSend.state === 'pending'
       );
     },
-    // Dynamic class based on transaction status
+
     statusClass() {
       return {
         'is-success': this.isSuccess,
@@ -213,11 +215,9 @@ export default {
         'is-sent': !this.recieve,
       };
     },
+
     symbol() {
-      return (
-        (this.transaction.tokenInfo && this.transaction.tokenInfo.symbol) ||
-        'ETH'
-      );
+      return get(this.transaction, 'token.symbol', 'ETH');
     },
 
     transactionFormatedDate() {
@@ -236,20 +236,21 @@ export default {
     },
 
     parsedData() {
-      const dataString = this.transaction.data || '0x';
-
-      return hexToString(dataString);
+      return get(this.transaction, 'data', '0x');
     },
   },
 
   methods: {
     ...mapActions('transactions', ['resendTransaction', 'cancelTransaction']),
+
     requestPassword() {
       this.passwordModalOpen = true;
     },
+
     closePassword() {
       this.passwordModalOpen = false;
     },
+
     confirmPassword(password) {
       this.resendModalOpen = false;
       this.passwordModalOpen = false;
@@ -272,22 +273,27 @@ export default {
         })
         .catch(() => {});
     },
+
     confirmResend(transaction) {
       this.transactionToSend = transaction;
       this.requestPassword();
     },
+
     toggleExpanded() {
       this.isExpanded = !this.isExpanded;
     },
+
     closeResendModal() {
       this.resendModalOpen = false;
     },
+
     resend() {
       this.transactionToSend = this.transaction.clone();
       this.transactionToSend.state = null;
       this.resendModalOpen = true;
       this.state = 'resent';
     },
+
     cancel() {
       if (this.transaction.state !== 'pending') return;
 
@@ -299,6 +305,7 @@ export default {
       this.transactionToSend.state = null;
       this.requestPassword();
     },
+
     incrementDIsplayDate() {
       this.displayDate = dayjs(this.transaction.date)
         .add(10, 's')
@@ -321,6 +328,7 @@ export default {
     PasswordModal,
     VSpinner,
   },
+
   filters: {
     truncateHash(value) {
       if (!value) return '';

@@ -6,7 +6,7 @@ import {
   Transaction,
   TransactionFactory,
 } from '@/class';
-import ethplorerService from '@/services/ethplorer';
+import cryptoDataService from '@/services/cryptoData';
 import web3 from '@/class/singleton/web3';
 import {
   getShortStringWithEllipsis,
@@ -135,7 +135,6 @@ const handleSendingError = (
   dispatch('errors/emitError', error, { root: true });
 };
 
-// Transaction history from ethplorer
 const updateTransactionHistory = async ({
   commit,
   dispatch,
@@ -146,28 +145,32 @@ const updateTransactionHistory = async ({
 
   try {
     const { address } = rootState.accounts;
-    const res = await ethplorerService.getTransactionHistory(address);
+    const network = rootGetters['web3/activeNetwork'];
+    const res = await cryptoDataService.getTransactionHistory({
+      address,
+      network,
+    });
     const transactions = res.map(trx => new Transaction(trx));
 
     commit(SET_TRANSACTION_HISTORY, transactions);
-        
+
     dispatch(
       'connectionStatus/updateApiErrorStatus',
       {
-        id: 'ethplorer',
+        id: 'cryptoData',
         status: true,
       },
       { root: true },
     );
-  } catch (e) {
+  } catch (err) {
     const error = new NotificationError({
-      ...e,
+      ...err,
       title: 'Failed to get transaction information',
       text:
         'An error occurred while retrieving transaction information. Please try again.',
       type: 'is-warning',
       apiError: {
-        id: 'ethplorer',
+        id: 'cryptoData',
         status: false,
       },
     });
@@ -227,7 +230,7 @@ const handleBlockTransactions = (
     rootGetters['web3/isMainNetwork'] &&
     trxAddresses.some(trxAddress => trxAddress === address)
   ) {
-    dispatch('updateTransactionHistory');
+    dispatch('cryptoDataService');
   }
 };
 

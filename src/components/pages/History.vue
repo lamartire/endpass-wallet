@@ -7,8 +7,8 @@
             <h1 class="card-header-title">Transaction history</h1>
           </div>
           <div class="card-content">
-            <ul 
-              v-if="currentNetTransactions.length > 0" 
+            <ul
+              v-if="currentNetTransactions.length > 0"
               class="transactions"
             >
               <li
@@ -16,12 +16,14 @@
                 :key="transaction.hash"
                 data-test="transactions-history-item"
               >
-                <app-transaction :transaction="transaction"/>
+                <transaction :transaction="transaction"/>
               </li>
             </ul>
             <p
               v-else-if="!isHistoryAvailable"
-            >Transaction history is only supported on the main network.</p>
+            >
+              Transaction history is only supported on the main network.
+            </p>
             <v-spinner v-else-if="isLoading"/>
             <p v-else>This account has no transactions.</p>
           </div>
@@ -34,7 +36,7 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import VSpinner from '@/components/ui/VSpinner';
-import appTransaction from '@/components/Transaction';
+import Transaction from '@/components/Transaction';
 import { MAIN_NET_ID } from '@/constants';
 
 export default {
@@ -73,9 +75,14 @@ export default {
         return;
       }
 
-      this.isLoading = true;
-      await this.updateTransactionHistory();
-      this.isLoading = false;
+      try {
+        this.isLoading = true;
+        await this.updateTransactionHistory();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        this.isLoading = false;
+      }
     },
   },
 
@@ -84,7 +91,7 @@ export default {
   },
 
   components: {
-    appTransaction,
+    Transaction,
     VSpinner,
   },
 };

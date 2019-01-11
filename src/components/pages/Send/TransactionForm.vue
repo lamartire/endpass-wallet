@@ -35,7 +35,7 @@
     <transaction-amount-options
       v-model="transaction.value"
       :tokens-currencies="currentAccountTokensCurrencies"
-      :current-token="transaction.tokenInfo"
+      :current-token="transaction.token"
       :fiat-currency="fiatCurrency"
       :eth-price="ethPrice"
       :balance="balance"
@@ -44,7 +44,7 @@
       :active-net="activeNet"
       :is-loading="isLoading"
       :show-fee="!!transaction.to"
-      @change-token="changeTokenInfo"
+      @change-token="changeToken"
     />
 
     <transaction-priority-options
@@ -57,7 +57,7 @@
     <transaction-advanced-options
       v-if="!isLoadingGasPrice"
       :transaction="transaction"
-      :current-token="transaction.tokenInfo"
+      :current-token="transaction.token"
       :is-loading="isLoading"
       :is-opened="!prices"
       @change="handleAdvancedChange"
@@ -180,7 +180,7 @@ export default {
       this.debouncedGasCostEstimation();
     },
 
-    'transaction.tokenInfo': {
+    'transaction.token': {
       handler() {
         this.debouncedGasCostEstimation();
       },
@@ -210,13 +210,13 @@ export default {
   methods: {
     ...mapActions('gasPrice', ['getGasPrice']),
 
-    changeTokenInfo(value) {
+    changeToken(value) {
       if (value) {
-        const tokenInfo = this.currentAccountTokenBySymbol(value);
+        const token = this.currentAccountTokenBySymbol(value);
 
-        this.$set(this.transaction, 'tokenInfo', tokenInfo);
+        this.$set(this.transaction, 'token', token);
       } else {
-        this.$set(this.transaction, 'tokenInfo', null);
+        this.$set(this.transaction, 'token', null);
       }
     },
 

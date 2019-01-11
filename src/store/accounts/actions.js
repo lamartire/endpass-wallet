@@ -1,5 +1,9 @@
 import { get, mapKeys, isEmpty } from 'lodash';
-import { userService, localSettingsService } from '@/services';
+import {
+  userService,
+  cryptoDataService,
+  localSettingsService,
+} from '@/services';
 import web3 from '@/class/singleton/web3';
 import Bip39 from 'bip39';
 import HDKey from 'ethereumjs-wallet/hdkey';
@@ -33,7 +37,7 @@ const selectWallet = async ({ commit, dispatch }, address) => {
   await dispatch('tokens/getCurrentAccountTokens', null, {
     root: true,
   });
-  await dispatch('tokens/getCurrentAccountTokensData', null, {
+  await dispatch('tokens/getCurrentAccountTokensPrices', null, {
     root: true,
   });
 };
@@ -247,15 +251,30 @@ const updateWallets = async ({ dispatch }, { wallets }) => {
   }
 };
 
-const updateBalance = async ({ commit, dispatch, state }) => {
+const updateBalance = async ({ commit, dispatch, state, rootGetters }) => {
   if (!state.address) return;
 
-  try {
-    const balance = await web3.eth.getBalance(state.address);
+  const activeNetwork = rootGetters['web3/activeNetwork'];
 
+  try {
+    const { balance, tokens } = await cryptoDataService.getAccountBalance({
+      address: state.address,
+      network: activeNetwork,
+    });
+
+    dispatch(
+      'tokens/setTokensWithBalancesByAddress',
+      {
+        address: state.address,
+        tokens,
+      },
+      {
+        root: true,
+      },
+    );
     commit(SET_BALANCE, balance);
-  } catch (e) {
-    dispatch('errors/emitError', e, { root: true });
+  } catch (err) {
+    dispatch('errors/emitError', err, { root: true });
   }
 };
 

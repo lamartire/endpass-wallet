@@ -12,7 +12,7 @@
       </tr>
       <tr>
         <th>Amount</th>
-        <th>{{ transaction.value }} {{ transaction.tokenInfo && transaction.tokenInfo.symbol || currency.name }}</th>
+        <th>{{ transaction.value }} {{ currencySymbol }}</th>
       </tr>
       <tr>
         <th>Gas price</th>
@@ -31,6 +31,8 @@
 </template>
 
 <script>
+import { get } from 'lodash';
+
 export default {
   name: 'TransactionTable',
 
@@ -43,6 +45,14 @@ export default {
     currency: {
       type: Object,
       required: true,
+    },
+  },
+
+  computed: {
+    currencySymbol() {
+      const { transaction, currency } = this;
+
+      return get(transaction, 'token.symbol', currency.name);
     },
   },
 };

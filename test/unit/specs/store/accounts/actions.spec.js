@@ -74,7 +74,7 @@ describe('Accounts actions', () => {
       );
       expect(dispatch).toHaveBeenNthCalledWith(
         5,
-        'tokens/getCurrentAccountTokensData',
+        'tokens/getCurrentAccountTokensPrices',
         null,
         { root: true },
       );

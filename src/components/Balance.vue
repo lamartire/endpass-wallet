@@ -1,15 +1,23 @@
 <template>
   <div class="balance has-spinner">
-    <span
-      :title="balanceString"
-      :class="{'long-number': balance.length > 6}"
-      class="title amount"
+    <div
+      v-if="isLoading"
+      class="balance-spinner"
     >
-      {{ balanceStringShort }}
-    </span>
-    <span class="currency">
-      {{ currency }}
-    </span>
+      <v-spinner class="is-transparent" />
+    </div>
+    <template v-else>
+      <span
+        :title="balanceString"
+        :class="{'long-number': balanceString.length > 6}"
+        class="title amount"
+      >
+        {{ balanceStringShort }}
+      </span>
+      <span class="currency">
+        {{ currency }}
+      </span>
+    </template>
     <a
       v-if="hasUpdate"
       :class="{'is-loading': isLoading}"
@@ -21,18 +29,16 @@
         v-html="require('@/img/reload.svg')"
       />
     </a>
-    <v-spinner
-      v-if="isLoading"
-      class="is-transparent"
-    />
   </div>
 </template>
 <script>
+import { get } from 'lodash';
 import { BigNumber } from 'bignumber.js';
 import VSpinner from '@/components/ui/VSpinner';
 
 export default {
   name: 'Balance',
+
   props: {
     amount: {
       type: [Number, String],
@@ -64,51 +70,41 @@ export default {
       default: false,
     },
   },
+
   computed: {
-    balance() {
-      let amountBn;
+    balanceBN() {
+      const { price, amount } = this;
 
-      if (!BigNumber.isBigNumber(this.amount)) {
-        amountBn = new BigNumber(this.amount);
-      } else {
-        amountBn = this.amount;
-      }
-
-      let priceBn;
-
-      if (!BigNumber.isBigNumber(this.price)) {
-        priceBn = new BigNumber(this.price);
-      } else {
-        priceBn = this.price;
-      }
-
-      const balance = amountBn.times(priceBn);
-
-      return balance;
+      return BigNumber(amount).times(price);
     },
+
     balanceString() {
-      let balanceString = this.balance
+      const balanceString = this.balanceBN
         .toFixed(parseInt(this.decimals, 10))
         .match(/^[0-9]{1,18}(\.[0-9]{0,18}[^0]{1,18}){0,1}/);
-      balanceString = balanceString ? balanceString[0] : '0';
-      return balanceString;
+
+      return get(balanceString, '[0]', '0');
     },
+
     balanceStringShort() {
-      let balanceString = this.balance
+      const balanceString = this.balanceBN
         .toFixed(this.round)
         .match(/^[0-9]{1,18}(\.[0-9]{0,18}[^0]{1,18}){0,1}/);
-      balanceString = balanceString ? balanceString[0] : '0';
-      return balanceString;
+
+      return get(balanceString, '[0]', '0');
     },
+
     hasUpdate() {
       return this.$listeners.update;
     },
   },
+
   methods: {
     update() {
       this.$emit('update');
     },
   },
+
   components: {
     VSpinner,
   },
@@ -118,6 +114,7 @@ export default {
 <style lang="scss">
 .balance {
   line-height: 2.2rem;
+
   .amount {
     color: inherit;
     display: inline-block;
@@ -145,5 +142,13 @@ export default {
       font-size: 0.8rem;
     }
   }
+}
+
+.balance-spinner {
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+  width: 2.2rem;
+  height: 2.2rem;
 }
 </style>

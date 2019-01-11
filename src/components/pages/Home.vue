@@ -1,11 +1,11 @@
 <template>
   <div class="home-page app-page">
-    <div 
-      v-if="address" 
+    <div
+      v-if="address"
       class="auth-content"
     >
-      <div 
-        class="section section-address" 
+      <div
+        class="section section-address"
         data-test="address-card"
       >
         <div class="container">
@@ -18,8 +18,8 @@
                 <div class="column">
                   <account :address="address"/>
                 </div>
-                <div 
-                  v-if="isExportable" 
+                <div
+                  v-if="isExportable"
                   class="column is-one-third"
                 >
                   <router-link
@@ -34,8 +34,8 @@
         </div>
       </div>
 
-      <div 
-        v-if="currentNetUserTokensList.length > 0" 
+      <div
+        v-if="currentNetUserTokensList.length > 0"
         class="section section-tokens"
       >
         <div class="container">

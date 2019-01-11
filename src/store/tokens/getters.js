@@ -38,7 +38,7 @@ const fullTokens = (state, getters) => (address, tokens) => {
       [key]: {
         ...token,
         balance: balances[key] || '0',
-        price: state.prices[token.symbol] || '0',
+        price: state.prices[token.symbol] || null,
       },
     });
   }, {});
