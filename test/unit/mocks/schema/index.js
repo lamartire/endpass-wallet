@@ -1,8 +1,13 @@
 jest.mock('@/schema', () => ({
   cryptoDataValidator: {
-    validateGasPrice: jest.fn(data => data),
-    validateSymbolPrice: jest.fn(data => data),
-    validateSymbolsPrice: jest.fn(data => data),
+    validateCryptoDataToken: jest.fn(data => data),
+    validateCryptoDataTokens: jest.fn(data => data),
+    validateCryptoDataTransaction: jest.fn(data => data),
+    validateCryptoDataTransactions: jest.fn(data => data),
+    validateCryptoDataBalance: jest.fn(data => data),
+    validateCryptoDataSymbolPrice: jest.fn(data => data),
+    validateCryptoDataSymbolPrices: jest.fn(data => data),
+    validateCryptoDataGasPrice: jest.fn(data => data),
   },
   v3KeystoreValidator: {
     validateAddresses: jest.fn(data => data),

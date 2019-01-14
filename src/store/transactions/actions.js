@@ -145,6 +145,11 @@ const updateTransactionHistory = async ({
 
   try {
     const { address } = rootState.accounts;
+    const network = rootGetters['web3/activeNetwork'];
+    const res = await cryptoDataService.getTransactionHistory({
+      address,
+      network,
+    });
     const transactions = res.map(trx => new Transaction(trx));
 
     commit(SET_TRANSACTION_HISTORY, transactions);

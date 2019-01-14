@@ -20,9 +20,9 @@
     <div class="media-right">
       <slot name="balance">
         <balance
-          v-if="balance && balance.length"
+          v-if="showBalance"
           slot="balance"
-          :amount="balance"
+          :amount="formatedBalance"
           :currency="currency"
         />
       </slot>
@@ -31,56 +31,73 @@
 </template>
 
 <script>
+import web3 from '@/class/singleton/web3';
+import { getShortStringWithEllipsis } from '@endpass/utils/strings';
 import makeBlockie from 'ethereum-blockies-base64';
 import Balance from '@/components/Balance';
-import { getShortStringWithEllipsis } from '@endpass/utils/strings';
+
+const { fromWei } = web3.utils;
 
 export default {
   name: 'Account',
+
   props: {
     address: {
       type: String,
       required: true,
     },
+
     currency: {
       type: String,
       default: 'ETH',
     },
+
     balance: {
-      type: String,
-      default: null,
+      type: [String, Number],
+      default: 0,
     },
-    // Maximum length of address
+
     size: {
       type: Number,
       default: 50,
     },
+
+    showBalance: {
+      type: Boolean,
+      default: false,
+    },
   },
+
   computed: {
     icon() {
       const seed = `0x${this.address.toLowerCase().replace(/^0x/, '')}`;
 
       return makeBlockie(seed);
     },
+
     addressFmt() {
-      if (this.address.length <= this.size) {
-        return this.address;
+      const { address, size } = this;
+
+      if (address.length <= size) {
+        return address;
       }
 
-      if (this.size === 0) {
+      if (size === 0) {
         return '';
       }
 
-      if (this.size < 8) {
-        return `...${this.address.substr(this.address.length - this.size)}`;
+      if (size < 8) {
+        return `...${this.address.substr(address.length - size)}`;
       }
 
-      return getShortStringWithEllipsis(
-        this.address,
-        Math.round(this.size / 2),
-      );
+      return getShortStringWithEllipsis(address, Math.round(size / 2));
+    },
+
+    formatedBalance() {
+      return fromWei(this.balance.toString());
     },
   },
+
   components: { Balance },
 };
 </script>

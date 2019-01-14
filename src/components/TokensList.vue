@@ -14,21 +14,7 @@
           :token="token"
           :currency="currency"
           :price="ethPrice"
-        >
-          <!-- <a
-            v-if="isTokenCanBeDeleted(token)"
-            slot="right"
-            class="is-inline-block remove-token-button"
-            title="Remove Token"
-            data-test="delete-button"
-            @click="deleteToken(token)"
-          >
-            <span
-              class="icon has-text-danger is-small is-pulled-right"
-              v-html="require('@/img/x.svg')"
-            />
-          </a> -->
-        </v-token>
+        />
       </li>
     </ul>
     <p
@@ -41,7 +27,7 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import error from '@/mixins/error';
 import VToken from '@/components/VToken';
 
@@ -70,26 +56,6 @@ export default {
       currency: state => state.user.settings.fiatCurrency,
       userTokens: state => state.tokens.userTokens,
     }),
-  },
-
-  methods: {
-    ...mapActions('tokens', ['removeUserToken']),
-
-    isTokenCanBeDeleted(token) {
-      const { hasRemove, currentNetUserFullTokens } = this;
-
-      return (
-        hasRemove &&
-        currentNetUserFullTokens[token.address] &&
-        token.balance === '0'
-      );
-    },
-
-    async deleteToken(token) {
-      await this.removeUserToken({
-        token,
-      });
-    },
   },
 
   mixins: [error],

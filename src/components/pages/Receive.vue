@@ -1,15 +1,14 @@
 <template>
-  <div 
-    v-if="address" 
+  <div
+    v-if="address"
     class="app-page receive-page"
   >
     <div class="section">
       <div class="container">
         <account-wallet-card
           :address="address"
-          :balance="balance"
-          :is-current-account="true"
           :active-currency-name="activeCurrency.name"
+          :is-current-account="true"
           data-test="current-account"
         />
       </div>
@@ -22,9 +21,9 @@
           v-if="walletAddress !== address"
           :key="walletAddress"
           :address="walletAddress"
-          :balance="balances[walletAddress]"
           :active-currency-name="activeCurrency.name"
           :allow-send="!wallet.isPublic"
+          :show-balance="true"
           data-test="account"
           @send="clickSendButton(walletAddress)"
         />
@@ -38,12 +37,12 @@
             <h2 class="card-header-title">Incoming Payment History</h2>
           </div>
           <div class="card-content">
-            <ul 
-              v-if="incomingTransactions.length" 
+            <ul
+              v-if="incomingTransactions.length"
               class="transactions"
             >
-              <li 
-                v-for="transaction in incomingTransactions" 
+              <li
+                v-for="transaction in incomingTransactions"
                 :key="transaction.hash"
               >
                 <app-transaction :transaction="transaction"/>
@@ -60,57 +59,48 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import web3 from '@/class/singleton/web3';
 import VButton from '@/components/ui/form/VButton';
 import AppTransaction from '@/components/Transaction';
 import Account from '@/components/Account';
 import VSpinner from '@/components/ui/VSpinner';
 import AccountWalletCard from '@/components/AccountWalletCard';
 
-const { fromWei } = web3.utils;
-
 export default {
   name: 'ReceivePage',
 
-  data() {
-    return {
-      isLoading: true,
-      balances: {},
-    };
-  },
+  data: () => ({
+    isLoading: true,
+  }),
 
   computed: {
     ...mapState({
       address: state => state.accounts.address,
-      activeCurrency: state => state.web3.activeCurrency,
       wallets: state => state.accounts.wallets,
+      activeCurrency: state => state.web3.activeCurrency,
       activeNetId: state => state.web3.activeNet.id,
     }),
-    ...mapGetters('accounts', ['wallet', 'balance', 'isPublicAccount']),
+    ...mapGetters('accounts', ['wallet', 'isPublicAccount']),
     ...mapGetters('transactions', ['incomingTransactions']),
   },
 
   watch: {
     address: {
-      handler: 'getHistory',
+      handler() {
+        this.getHistory();
+      },
       immediate: true,
     },
 
     wallet: {
       handler() {
-        this.cryptoDataService();
+        this.updateTransactionHistory();
       },
-      immediate: true,
-    },
-
-    activeNetId: {
-      handler: 'getBalances',
       immediate: true,
     },
   },
 
   methods: {
-    ...mapActions('transactions', ['cryptoDataService']),
+    ...mapActions('transactions', ['updateTransactionHistory']),
     ...mapActions('accounts', ['selectWallet']),
 
     async clickSendButton(address) {
@@ -123,18 +113,16 @@ export default {
         this.isLoading = false;
         return;
       }
-      this.isLoading = true;
-      await this.cryptoDataService();
-      this.isLoading = false;
-    },
 
-    // TODO: move balances to the store, because it is not logic of view layer
-    getBalances() {
-      Object.keys(this.wallets).forEach(async address => {
-        const balance = await web3.eth.getBalance(address);
-
-        this.$set(this.balances, address, fromWei(balance));
-      });
+      try {
+        this.isLoading = true;
+        await this.updateTransactionHistory();
+      } catch (err) {
+        // TODO: does it need any actions to handle errors?
+        console.error(err);
+      } finally {
+        this.isLoading = false;
+      }
     },
   },
 

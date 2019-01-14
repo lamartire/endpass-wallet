@@ -34,12 +34,6 @@ const selectWallet = async ({ commit, dispatch }, address) => {
   dispatch('updateBalance');
   dispatch('updateAccountSettings');
   dispatch('dapp/reset', null, { root: true });
-  await dispatch('tokens/getCurrentAccountTokens', null, {
-    root: true,
-  });
-  await dispatch('tokens/getCurrentAccountTokensPrices', null, {
-    root: true,
-  });
 };
 
 const addWallet = async ({ commit, dispatch }, json) => {
@@ -251,19 +245,28 @@ const updateWallets = async ({ dispatch }, { wallets }) => {
   }
 };
 
-const updateBalance = async ({ commit, dispatch, state, rootGetters }) => {
+const getAccountBalanceByAddress = async ({ rootGetters }, address) => {
+  const activeNetwork = rootGetters['web3/activeNetwork'];
+  const res = await cryptoDataService.getAccountBalance({
+    network: activeNetwork,
+    toSymbol: 'ETH',
+    address,
+  });
+
+  return res;
+};
+
+const updateBalance = async ({ commit, dispatch, state }) => {
   if (!state.address) return;
 
-  const activeNetwork = rootGetters['web3/activeNetwork'];
-
   try {
-    const { balance, tokens } = await cryptoDataService.getAccountBalance({
-      address: state.address,
-      network: activeNetwork,
-    });
+    const { balance, tokens } = await dispatch(
+      'getAccountBalanceByAddress',
+      state.address,
+    );
 
     dispatch(
-      'tokens/setTokensWithBalancesByAddress',
+      'tokens/setFullTokensByAddress',
       {
         address: state.address,
         tokens,
@@ -516,4 +519,6 @@ export default {
   updateWalletsWithNewPassword,
   updateAccountSettings,
   init,
+
+  getAccountBalanceByAddress,
 };

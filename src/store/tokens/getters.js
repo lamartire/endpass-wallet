@@ -1,4 +1,4 @@
-import { pick, pickBy, uniq } from 'lodash';
+import { get, pick, pickBy, uniq, mapValues } from 'lodash';
 
 const activeCurrencyName = (state, getters, rootState) =>
   rootState.web3.activeCurrency.name;
@@ -31,17 +31,11 @@ const tokensByAddress = state => address => {
 const fullTokens = (state, getters) => (address, tokens) => {
   const balances = getters.balancesByAddress(address);
 
-  return Object.keys(tokens).reduce((acc, key) => {
-    const token = tokens[key];
-
-    return Object.assign(acc, {
-      [key]: {
-        ...token,
-        balance: balances[key] || '0',
-        price: state.prices[token.symbol] || null,
-      },
-    });
-  }, {});
+  return mapValues(tokens, token => ({
+    ...token,
+    balance: get(balances, token.address, '0'),
+    price: get(state.prices, token.address, null),
+  }));
 };
 
 const balancesByAddress = state => address =>

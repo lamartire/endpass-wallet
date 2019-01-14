@@ -18,6 +18,7 @@
           v-if="address"
           :currency="activeCurrencyName"
           :address="address"
+          :show-balance="showBalance"
           :balance="balance"
         />
       </div>
@@ -38,7 +39,7 @@
         <v-spinner v-if="isLoading" />
         <tokens-list
           v-if="!isLoading"
-          :tokens="accountTokensList"
+          :tokens="tokens"
         />
       </div>
     </div>
@@ -46,7 +47,8 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { get } from 'lodash';
+import { mapActions } from 'vuex';
 import Account from '@/components/Account';
 import TokensList from '@/components/TokensList';
 import VSpinner from '@/components/ui/VSpinner';
@@ -71,46 +73,39 @@ export default {
       required: true,
     },
 
-    balance: {
-      type: String,
-      default: '0',
+    allowSend: {
+      type: Boolean,
+      default: false,
     },
 
-    allowSend: {
+    showBalance: {
       type: Boolean,
       default: false,
     },
   },
 
   data: () => ({
+    balance: '0',
+    tokens: [],
     isLoading: false,
   }),
 
-  computed: {
-    ...mapGetters('tokens', ['fullTokensByAddress']),
-
-    accountTokens() {
-      return this.fullTokensByAddress(this.address);
-    },
-
-    accountTokensList() {
-      return Object.values(this.accountTokens);
-    },
-  },
-
   methods: {
-    ...mapActions('tokens', ['getTokensByAddress']),
+    ...mapActions('accounts', ['getAccountBalanceByAddress']),
 
     async loadTokensData() {
-      const { address, accountTokens, getTokensByAddress } = this;
+      try {
+        this.isLoading = true;
 
-      this.isLoading = true;
+        const res = await this.getAccountBalanceByAddress(this.address);
 
-      if (Object.keys(accountTokens).length === 0) {
-        await getTokensByAddress({ address });
+        this.balance = get(res, 'balance', '0');
+        this.tokens = get(res, 'tokens', []);
+      } catch (err) {
+        // TODO: does it need any actions to handle errors?
+      } finally {
+        this.isLoading = false;
       }
-
-      this.isLoading = false;
     },
 
     emitSend() {

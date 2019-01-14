@@ -23,10 +23,6 @@ const changeNetwork = async ({ commit, dispatch, getters }, { networkUrl }) => {
     dispatch('price/updatePrice', {}, { root: true }),
     dispatch('accounts/updateBalance', {}, { root: true }),
     dispatch('tokens/getNetworkTokens', {}, { root: true }),
-    dispatch('tokens/getCurrentAccountTokens', {}, { root: true }),
-    dispatch('tokens/getCurrentAccountTokensPrices', null, {
-      root: true,
-    }),
     dispatch('dapp/reset', null, { root: true }),
   ]).catch(e => dispatch('errors/emitError', e, { root: true }));
 };
@@ -35,7 +31,7 @@ const changeCurrency = async (
   { commit, dispatch, getters, state },
   { currencyId },
 ) => {
-  const currency = CURRENCIES.find(currency => currency.id === currencyId);
+  const currency = CURRENCIES.find(({ id }) => id === currencyId);
 
   commit(CHANGE_CURRENCY, currency);
 
@@ -191,8 +187,6 @@ const init = async ({ commit, dispatch, state }) => {
     commit(SET_NETWORKS, networks);
     commit(CHANGE_NETWORK, activeNet);
     commit(CHANGE_CURRENCY, activeCurrency);
-
-    await dispatch('tokens/getCurrentAccountTokens', {}, { root: true });
   } catch (e) {
     await dispatch('errors/emitError', e, { root: true });
   }

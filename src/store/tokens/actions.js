@@ -14,16 +14,6 @@ import { MAIN_NET_ID } from '@/constants';
 
 const init = async ({ dispatch }) => {
   await dispatch('getNetworkTokens');
-
-  dispatch('subscribeOnCurrentAccountTokensUpdates');
-};
-
-const subscribeOnCurrentAccountTokensUpdates = ({ dispatch }) => {
-  dispatch('getCurrentAccountTokensPrices');
-
-  setInterval(() => {
-    dispatch('getCurrentAccountTokensPrices');
-  }, ENV.priceUpdateInterval);
 };
 
 const addUserToken = async (
@@ -73,74 +63,6 @@ const removeUserToken = async (
   }
 };
 
-const getCurrentAccountTokens = async ({ commit, dispatch, rootState }) => {
-  const { address } = rootState.accounts;
-
-  if (!address) return;
-
-  try {
-    commit(SET_LOADING, true);
-
-    await dispatch('getTokensByAddress', {
-      address,
-    });
-  } catch (err) {
-    const error = new NotificationError({
-      title: 'Failed token subscription',
-      text: "Token information won't be updated. Please reload page.",
-      type: 'is-warning',
-    });
-    dispatch('errors/emitError', error, { root: true });
-  } finally {
-    commit(SET_LOADING, false);
-  }
-};
-
-const getCurrentAccountTokensPrices = async ({ dispatch, getters }) => {
-  await dispatch('getTokensPrices', {
-    tokensSymbols: Object.values(getters.allCurrentAccountTokens).map(
-      ({ symbol }) => symbol,
-    ),
-  });
-};
-
-const getTokensByAddress = async (
-  { dispatch, commit, rootGetters },
-  { address },
-) => {
-  try {
-    const activeNetwork = rootGetters['web3/activeNetwork'];
-    const resolvedTokens = await cryptoDataService.getTokensWithBalance({
-      network: activeNetwork,
-      address,
-    });
-
-    dispatch(
-      'connectionStatus/updateApiErrorStatus',
-      {
-        id: 'cryptoData',
-        status: true,
-      },
-      { root: true },
-    );
-
-    const mappedTokens = mapArrayByProp(resolvedTokens, 'address');
-
-    commit(ADD_NETWORK_TOKENS, mappedTokens);
-    commit(SET_TOKENS_BY_ADDRESS, {
-      address,
-      tokens: Object.keys(mappedTokens),
-    });
-  } catch (e) {
-    // May be we must set empty array to user tokens
-    e.apiError = {
-      id: 'cryptoData',
-      status: false,
-    };
-    dispatch('errors/emitError', e, { root: true });
-  }
-};
-
 const getNetworkTokens = async ({ commit, dispatch, rootGetters }) => {
   const isMainNetwork = rootGetters['web3/activeNetwork'] === MAIN_NET_ID;
 
@@ -175,15 +97,10 @@ const getTokensPrices = async ({ commit, getters }, { tokensSymbols }) => {
     );
 
     commit(ADD_TOKENS_PRICES, prices);
-  } catch (err) {
-    commit(ADD_TOKENS_PRICES, {});
-  }
+  } catch (err) {}
 };
 
-const setTokensWithBalancesByAddress = async (
-  { commit },
-  { address, tokens },
-) => {
+const setFullTokensByAddress = async ({ commit }, { address, tokens }) => {
   const tokensByAddress = mapKeys(tokens, 'address');
 
   commit(SET_TOKENS_BY_ADDRESS, {
@@ -194,17 +111,14 @@ const setTokensWithBalancesByAddress = async (
     balances: mapValues(tokensByAddress, token => token.balance),
     address,
   });
+  commit(ADD_TOKENS_PRICES, mapValues(tokensByAddress, token => token.price));
 };
 
 export default {
   init,
-  subscribeOnCurrentAccountTokensUpdates,
   addUserToken,
   removeUserToken,
-  getCurrentAccountTokens,
   getNetworkTokens,
-  getTokensByAddress,
   getTokensPrices,
-  getCurrentAccountTokensPrices,
-  setTokensWithBalancesByAddress,
+  setFullTokensByAddress,
 };

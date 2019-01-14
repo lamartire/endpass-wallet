@@ -5,11 +5,27 @@ import { http } from '@/class/singleton';
 import { CRYPTODATA_API_URL } from '@/constants';
 import { cryptoDataValidator } from '@/schema';
 
-console.log(cryptoDataValidator);
-
 const throttle = throttledQueue(3, ENV.serviceThrottleTimeout);
 
 const cryptoDataService = {
+  /**
+   * @returns {Promise<>}
+   */
+  async getGasPrice() {
+    try {
+      const { data } = await http.get(`${ENV.cryptoDataAPIUrl}/gas/price`);
+
+      return cryptoDataValidator.validateCryptoDataGasPrice(data);
+    } catch (err) {
+      throw new NotificationError({
+        title: 'Failed to get suggested gas price',
+        text:
+          'An error occurred while retrieving suggested gas price. Please, set manually or, try again.',
+        type: 'is-warning',
+      });
+    }
+  },
+
   /**
    * @param {[type]} fromSymbols
    * @param {[type]} toSymbol
@@ -53,29 +69,11 @@ const cryptoDataService = {
   },
 
   /**
-   * @returns {Promise<>}
-   */
-  async getGasPrice() {
-    try {
-      const { data } = await http.get(`${ENV.cryptoDataAPIUrl}/gas/price`);
-
-      return cryptoDataValidator.validateCryptoDataGasPrice(data);
-    } catch (err) {
-      throw new NotificationError({
-        title: 'Failed to get suggested gas price',
-        text:
-          'An error occurred while retrieving suggested gas price. Please, set manually or, try again.',
-        type: 'is-warning',
-      });
-    }
-  },
-
-  /**
    * @param {Number} options.network
    * @param {String} options.address
    * @returns {Promise<Object>}
    */
-  getAccountBalance({ network, address }) {
+  getAccountBalance({ network, address, toSymbol }) {
     return new Promise((resolve, reject) =>
       throttle(async () => {
         try {
@@ -92,9 +90,17 @@ const cryptoDataService = {
             balance,
             tokens,
           } = cryptoDataValidator.validateCryptoDataBalance(res.data);
+          const actualTokens = tokens.filter(token => token.price);
+          const tokensPrices = await cryptoDataService.getSymbolsPrice(
+            actualTokens.map(({ symbol }) => symbol),
+            toSymbol,
+          );
 
           return resolve({
-            tokens: tokens.filter(token => token.price),
+            tokens: actualTokens.map(token => ({
+              ...token,
+              price: tokensPrices[token.symbol] || 0,
+            })),
             balance,
           });
         } catch (err) {
@@ -105,19 +111,8 @@ const cryptoDataService = {
   },
 
   /**
-   * @param   {Number} options.network
-   * @param   {String} options.address
-   * @returns {Promise<Array<Object>>}
-   */
-  getTokensWithBalance({ network, address }) {
-    return cryptoDataService
-      .getAccountBalance({ network, address })
-      .then(res => get(res, 'tokens', []));
-  },
-
-  /**
-   * @param   {Number} options.network
-   * @param   {String} options.address
+   * @param {Number} options.network
+   * @param {String} options.address
    * @returns {Promise<Array<Object>>}
    */
   getHistoryWithTokens({ network, address }) {

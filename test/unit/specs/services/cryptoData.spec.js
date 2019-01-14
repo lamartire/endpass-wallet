@@ -4,12 +4,18 @@ import { NotificationError } from '@/class';
 import { cryptoDataValidator } from '@/schema';
 import { gasPrice } from 'fixtures/gasPrice';
 import { price, priceMulti } from 'fixtures/price';
+import { address } from 'fixtures/accounts';
 
 const cryptoDataService = require.requireActual('@/services/cryptoData')
   .default;
 
 describe('Crypto data service', () => {
-  const axiosMock = new MockAdapter(http);
+  const apiUrl = 'https://api.cryptoData.io';
+  let axiosMock;
+
+  beforeEach(() => {
+    axiosMock = new MockAdapter(http);
+  });
 
   afterEach(() => {
     axiosMock.reset();
@@ -193,6 +199,148 @@ describe('Crypto data service', () => {
       await expect(cryptoDataService.getGasPrice()).rejects.toThrow(
         expectedError,
       );
+    });
+  });
+
+  describe('getTokensWithBalance', () => {
+    const url = `${apiUrl}/getAddressInfo/${address}`;
+
+    const successTokenResp = {
+      tokens: [
+        {
+          tokenInfo: {
+            price: '0',
+          },
+        },
+        {
+          tokenInfo: {
+            price: '0',
+          },
+        },
+      ],
+    };
+
+    // TODO: вернуть
+    // it('should make correct request', () => {
+    //   expect.assertions(2);
+    //   axiosMock.onGet(url).reply(config => {
+    //     console.log(config);
+    //     expect(config.method).toBe('get');
+    //     expect(config.url).toBe(url);
+
+    //     return [200, successTokenResp];
+    //   });
+    // });
+
+    it('should handle successfull request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(200, successTokenResp);
+      const result = await cryptoDataService.getTokensWithBalance(address);
+
+      expect(result).toHaveLength(2);
+    });
+
+    it('should return empty array with failed request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(200, { success: false });
+      const result = await cryptoDataService.getTokensWithBalance(address);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw exception with rejected request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(500, {});
+
+      await expect(
+        cryptoDataService.getTokensWithBalance(address),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('getHistory', () => {
+    const { getHistory } = cryptoDataService;
+    const url = `${apiUrl}/getAddressHistory/${address}`;
+
+    const successResp = {
+      operations: [{}, {}],
+    };
+
+    it('should make correct request', async () => {
+      expect.assertions(2);
+      axiosMock.onGet(url).reply(config => {
+        expect(config.method).toBe('get');
+        expect(config.url).toBe(url);
+
+        return [200, successResp];
+      });
+
+      await getHistory(address);
+    });
+
+    it('should handle successfull request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(200, successResp);
+      const result = await getHistory(address);
+
+      expect(result).toHaveLength(2);
+    });
+
+    it('should return empty array with failed request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(200, { success: false });
+      const result = await getHistory(address);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw exception with rejected request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(500, {});
+
+      await expect(getHistory(address)).rejects.toThrow();
+    });
+  });
+
+  describe('getInfo', () => {
+    const { getInfo } = cryptoDataService;
+    const url = `${apiUrl}/getAddressTransactions/${address}`;
+
+    const successResp = [{}, {}];
+
+    it('should make correct request', async () => {
+      expect.assertions(2);
+      axiosMock.onGet(url).reply(config => {
+        expect(config.method).toBe('get');
+        expect(config.url).toBe(url);
+
+        return [200, successResp];
+      });
+
+      await getInfo(address);
+    });
+
+    it('should handle successfull request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(200, successResp);
+      const result = await getInfo(address);
+
+      expect(result).toHaveLength(2);
+    });
+
+    it('should return empty array with failed request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(200, undefined);
+      const result = await getInfo(address);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw exception with rejected request', async () => {
+      expect.assertions(1);
+      axiosMock.onGet(url).reply(500, {});
+
+      await expect(getInfo(address)).rejects.toThrow();
     });
   });
 });
